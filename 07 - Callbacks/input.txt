@@ -1,2 +1,1 @@
-This is the eniterly new content updated in the file
-This is the appended data
+This is the very first msg in the file
