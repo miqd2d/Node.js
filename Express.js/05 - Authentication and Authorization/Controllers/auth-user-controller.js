@@ -91,4 +91,43 @@ const loginUser = async(req,res)=>{
 
 }
 
-module.exports = {registerUser, loginUser};
+const changePassword = async(req,res) =>{
+    // Get the current user
+    const user = req.UserInfo.userID;
+
+    // Check if the user exists or not
+    const userExists = await User.findById(user);
+
+    if(!userExists){
+        return res.status(400).json({
+            success : false,
+            message : "User does not exists..."
+        })
+    }
+
+    // Check if the old password is correct
+    const {oldPassword , newPassword} = req.body;
+
+    const passwordMatch = await checkPassword(oldPassword, userExists.password);
+
+    if(!passwordMatch){
+        return res.status(401).json({
+            success : false,
+            message : "Invalid Password...",
+        })
+    }
+
+    // Change the password
+    const newHashedPassword = await generateHashedPassword(newPassword);
+
+    userExists.password = newHashedPassword;
+    userExists.save();
+
+    return res.status(201).json({
+        success : true,
+        message : "Password changed successfully..."
+    })
+
+}
+
+module.exports = {registerUser, loginUser, changePassword};
