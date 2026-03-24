@@ -130,4 +130,35 @@ const changePassword = async(req,res) =>{
 
 }
 
-module.exports = {registerUser, loginUser, changePassword};
+const getAllUsers = async(req,res)=>{
+    // Getting the queries for pages and limits and any sort filter
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 5;
+    const sortBy = req.query.sortBy || 'role'
+    const sortOrder = req.query.sortOrder === "asc" ? 1 : -1
+    // Caluculating how much data to skip to get the appropriate data for that page
+    const skip = (page-1) * limit;
+
+    // Calcluate the total data
+    const totalUsers = await User.countDocuments();
+    const totalPages = Math.ceil(totalUsers/limit);
+
+    // Creating a sort Object
+    sortObj = {};
+    sortObj[sortBy] = sortOrder;
+
+    const data = await User.find().sort(sortObj).skip(skip).limit(limit);
+    return res.status(200).json({
+        success : true,
+        message : {
+            totalUsers : totalUsers,
+            totalPages : totalPages,
+            currentPage : page,
+        },
+        data : data
+    })
+}
+
+
+
+module.exports = {registerUser, loginUser, changePassword, getAllUsers};
